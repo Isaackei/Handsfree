@@ -60,7 +60,11 @@ class Basic(object):
 class ButtonMixin(Basic):
 
     def target_button_ready(self, locate):
-        """判断目标按钮加载情况"""
+        """
+        判断目标按钮加载情况
+        :param locate: 目标定位的方法及路径，元祖，例如（By.XPATH, "//input[@class='btn']"）
+        :return: 成功获取后返回按钮对象
+        """
         refresh_count = 0
         while refresh_count < TOTAL_NUMBER_OF_REFRESH:
             try:
@@ -106,37 +110,53 @@ class LoginMixin(Basic):
         self.verify_code_input()
 
 
-class StockModeAMixin(Basic):
+class StockModeAMixin(ButtonMixin):
     """重消股"""
-    def buy_load_stocks(self, df, index):
-        # 数值定位
-        elements = self.driver.find_element_by_xpath("//input[@type='TEXT' and @name='Amount']']")
+    def complete_buy_load_stocks(self, locate=None, data_frame=None):
+        """完成重消股购买，并记录数据"""
+        self.target_button_ready(locate).click()
+        data_frame.record_data()
+
+    def buy_load_stocks(self, locate=None, data_frame=None):
+        # 元素定位
+        elements = self.driver.find_element_by_xpath("//input[@type='TEXT' and @name='Amount']")
         # 重消股数量
         stock_value = elements.get_attribute('value')
         # 判断是否为数值
         try:
-            stock_value = float(stock_value)
+            stock_value = "%.2f" % float(stock_value)
         except:
             stock_value = 0
         finally:
-            record_data(df=df, index=index, stocks=stock_value)
+            data_frame.stock_R_pin = stock_value  # 将股票数记录为数据对象的股票数属性
+
             if stock_value > 2:
-                self.driver.find_element_by_xpath("//input[@class='button'][@type='SUBMIT']").click()
-                # 点击完毕
-                url_check_2 = None
-                try:
-                    url_check_2 = WebDriverWait(self.driver, 5).until(
-                        EC.element_to_be_clickable((By.XPATH, "//input[@class='button'][@type='BUTTON'][@value=' 完毕 ']")))
-                except Exception as e:
-                    logging.exception(e)
-
-                # 执行完后，跳转页面既是完成交易页面
-                url_check_2.click()
+                self.target_button_ready(locate).click()
+            else:
+                # 数值不达标，直接执行数据保存
+                data_frame.record_data()
 
 
-class DemoSum(
-    ButtonMixin,
-    LoginMixin,
-    StockModeAMixin
-):
+            # 小于2不交易，还未安排执行动作
+
+
+class LogoutMixin(ButtonMixin):
+    def logout(self, locate=None, data_frame=None):
+        data_frame.final_redord_data()
+        self.target_button_ready(locate).click()
+        self.common_refresh()
+        # 写死最后退出元素定位
+        btn_locate = (By.XPATH, "//a[@href='logout.asp']")
+        self.target_button_ready(btn_locate).click()
+
+
+class DemoOne(ButtonMixin):
+    pass
+
+
+class DemoTwo(LoginMixin, StockModeAMixin, LogoutMixin):
+    pass
+
+
+class DemoSum(DemoOne, DemoTwo):
     pass

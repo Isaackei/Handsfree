@@ -14,6 +14,10 @@ class FilesData(object):
         self.path_of_file = pd.ExcelFile(self.file_name)
         self.new_file_name_format = SAVE_FILE_NAME
         self.df = None
+        self.user_account = None
+        self.data_index = None
+        self.data_length = None
+        self.stock_R_pin = None
 
     def create_new_file_name(self):
         """格式化新文件名"""
@@ -54,41 +58,49 @@ class FilesData(object):
     def find_data_marks(self):
         """
         传入数据，找出数据标记
-        :param df: 传入的DataFrame数据
-        :return: {
-            total count: 有效数据个数
-            current index: 当前进行到的数据索引
-        }
+        标记为：
+        Username 对应 数据个数
+        Password 对应 当前索引
+        Password2 对应 时间戳
         """
         try:
             print(self.df.loc["config"])
         except:
-            total_count = len(self.df)
+            self.data_length = len(self.df)
             dt = datetime.datetime.now().strftime('%Y-%m-%d%H:%M:%S')
-            current_index = 0
+            self.data_index = 0
             config = {
-                "Username": total_count,
-                "Password": current_index,
+                "Username": self.data_length,
+                "Password": self.data_index,
                 "Password2": dt,
                 "B-stocks": ""
             }
             self.df.loc["config"] = config
             self.df.to_excel(self.file_name)
-        return {
-            "total count": int(self.df.loc["config", "Username"]),
-            "current index": int(self.df.loc["config", "Password"])
-        }
+        finally:
+            self.data_index = int(self.df.loc["config", "Password"])
+            self.data_length = int(self.df.loc["config", "Username"])
 
-    @staticmethod
-    def get_user_info(df, index):
+    def get_user_info(self):
+        """把用户信息以类实例化属性储存，元祖"""
+        self.user_account = (
+            self.df.loc[self.data_index, "Username"],
+            self.df.loc[self.data_index, "Password"],
+            self.df.loc[self.data_index, "Password2"]
+        )
 
-        username = df.loc[index, "Username"]
-        password = df.loc[index, "Password"]
-        password2 = df.loc[index, "Password2"]
-
-        return username, password, password2
-
-    def record_data(self, index=0, stocks=None):
-        self.df.loc[index, 'B-stocks'] = stocks
-        self.df.loc["config", 'Password'] = index
+    def record_data(self):
+        """保存信息，注意，当前方法没有对索引递增"""
+        """这里需要考量浮点问题"""
+        self.df.loc[self.data_index, 'B-stocks'] = self.stock_R_pin
+        self.df.loc["config", 'Password'] = self.data_index
         self.df.to_excel(self.file_name)
+
+    def final_redord_data(self):
+        """最终的标记保存，其实就是递增一个索引"""
+        if self.data_index < self.data_length - 1:
+            self.data_index += 1
+            self.df.loc["config", 'Password'] = self.data_index
+            self.df.to_excel(self.file_name)
+        else:
+            print("complete")

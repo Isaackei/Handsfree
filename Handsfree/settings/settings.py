@@ -16,6 +16,8 @@ TOTAL_NUMBER_OF_REFRESH = 3
 # OPEN_FILE_NAME = "WBS.xls"
 # OPEN_FILE_NAME = "D:/testing/apps/WBS208_1020_53_16.xls"
 
-OPEN_FILE_NAME = filename_list[0]
+# OPEN_FILE_NAME = filename_list[0]
+OPEN_FILE_NAME = "D:/testing/Handsfree/Handsfree/apps/WBS.xls"
+# OPEN_FILE_NAME = "D:/testing/Handsfree/Handsfree/apps/WBS208_1320_31_06.xls"
 
 SAVE_FILE_NAME = "WBS2{}.xls"

@@ -33,8 +33,8 @@ def test():
     get_var_2 = var_2.get()
     get_var_3 = var_3.get()
     print("you have: {}, {}, {}".format(get_var_1, get_var_2, get_var_3))
-    from apps.main import start
-    start()
+    # from apps.main import start
+    # start()
 
 def xz():
     filename = tkinter.filedialog.askopenfilename()

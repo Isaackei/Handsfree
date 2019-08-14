@@ -18,6 +18,9 @@ class FilesData(object):
         self.data_index = None
         self.data_length = None
         self.stock_R_pin = None
+        self.method_mark = "1111"
+        self.old_file_mark_flag = True
+        self.finish_flag = True
 
     def create_new_file_name(self):
         """格式化新文件名"""
@@ -27,7 +30,6 @@ class FilesData(object):
     def read_file_data(self):
         """
         读取文件数据
-        :return: df 数据对象
         """
         # Read file
         df_prepare = pd.read_excel(self.path_of_file, dtype=str, header=0)
@@ -63,9 +65,11 @@ class FilesData(object):
         Password 对应 当前索引
         Password2 对应 时间戳
         """
+        self.old_file_mark_flag = True
         try:
             print(self.df.loc["config"])
         except:
+            self.old_file_mark_flag = False
             self.data_length = len(self.df)
             dt = datetime.datetime.now().strftime('%Y-%m-%d%H:%M:%S')
             self.data_index = 0
@@ -73,16 +77,19 @@ class FilesData(object):
                 "Username": self.data_length,
                 "Password": self.data_index,
                 "Password2": dt,
-                "B-stocks": ""
+                "B-stocks": self.method_mark
             }
             self.df.loc["config"] = config
             self.df.to_excel(self.file_name)
         finally:
             self.data_index = int(self.df.loc["config", "Password"])
             self.data_length = int(self.df.loc["config", "Username"])
+            self.method_mark = str(self.df.loc["config", "B-stocks"])
 
     def get_user_info(self):
         """把用户信息以类实例化属性储存，元祖"""
+        self.data_index = int(self.df.loc["config", "Password"])
+        self.method_mark = str(self.df.loc["config", "B-stocks"])
         self.user_account = (
             self.df.loc[self.data_index, "Username"],
             self.df.loc[self.data_index, "Password"],
@@ -96,11 +103,16 @@ class FilesData(object):
         self.df.loc["config", 'Password'] = self.data_index
         self.df.to_excel(self.file_name)
 
-    def final_redord_data(self):
+    def final_record_data(self):
         """最终的标记保存，其实就是递增一个索引"""
         if self.data_index < self.data_length - 1:
             self.data_index += 1
             self.df.loc["config", 'Password'] = self.data_index
             self.df.to_excel(self.file_name)
         else:
-            print("complete")
+            self.finish_flag = False
+
+    def progress_point_save(self):
+        """对当前进行的用户进度标记"""
+        self.df.loc["config", 'B-stocks'] = self.method_mark
+        self.df.to_excel(self.file_name)

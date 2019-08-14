@@ -3,9 +3,9 @@ import logging
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium import webdriver
 
 from settings.settings import DRIVER, URL, TOTAL_NUMBER_OF_REFRESH
-from apps.file_data import FilesData
 
 
 class Basic(object):
@@ -13,7 +13,8 @@ class Basic(object):
     浏览器初始化及基本配置准备
     """
     def __init__(self):
-        self.driver = DRIVER
+        self.star_driver = DRIVER
+        self.driver = None
         self.main_url = URL
         self.target_elements = None
         self.common_elements = EC.presence_of_element_located((By.XPATH, "//div[@class='Footer']"))
@@ -53,13 +54,14 @@ class Basic(object):
         前往指定网页
         并执行页面刷新判断
         """
+        self.driver = webdriver.Chrome(self.star_driver)
         self.driver.get(self.main_url)
         self.common_refresh()
 
 
 class ButtonMixin(Basic):
 
-    def target_button_ready(self, locate):
+    def target_button_ready(self, locate=None):
         """
         判断目标按钮加载情况
         :param locate: 目标定位的方法及路径，元祖，例如（By.XPATH, "//input[@class='btn']"）
@@ -67,9 +69,11 @@ class ButtonMixin(Basic):
         """
         refresh_count = 0
         while refresh_count < TOTAL_NUMBER_OF_REFRESH:
+            print("target_button_ready")
             try:
-                button = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(locate))
+                button = WebDriverWait(self.driver, 15).until(EC.element_to_be_clickable(locate))
                 if button:
+                    print("get")
                     return button
             except:
                 self.driver.refresh()
@@ -104,7 +108,7 @@ class LoginMixin(Basic):
         self.driver.find_element_by_css_selector("td>input").send_keys(username)
         self.driver.find_element_by_css_selector("[type='password']").send_keys(password)
 
-    def login_process(self, username=None, password=None):
+    def login_step(self, username=None, password=None):
         """集合登录流程"""
         self.account_input(username=username, password=password)
         self.verify_code_input()
@@ -112,37 +116,42 @@ class LoginMixin(Basic):
 
 class StockModeAMixin(ButtonMixin):
     """重消股"""
+    def __init__(self):
+        super().__init__()
+        self.stock_flag = False
+        self.stock_value = None
+
     def complete_buy_load_stocks(self, locate=None, data_frame=None):
         """完成重消股购买，并记录数据"""
         self.target_button_ready(locate).click()
         data_frame.record_data()
 
+    def stock_judge(self, locate=None):
+        """判断数值是否达标"""
+        self.stock_flag = False
+        if float(self.stock_value) > 2:
+            self.stock_flag = True
+            self.target_button_ready(locate).click()
+
     def buy_load_stocks(self, locate=None, data_frame=None):
-        # 元素定位
+        """重消股初步交易操作"""
         elements = self.driver.find_element_by_xpath("//input[@type='TEXT' and @name='Amount']")
         # 重消股数量
-        stock_value = elements.get_attribute('value')
+        stock_values = elements.get_attribute('value')
         # 判断是否为数值
         try:
-            stock_value = "%.2f" % float(stock_value)
+            self.stock_value = "%.2f" % float(stock_values)
         except:
-            stock_value = 0
+            self.stock_value = 0
         finally:
-            data_frame.stock_R_pin = stock_value  # 将股票数记录为数据对象的股票数属性
+            data_frame.stock_R_pin = self.stock_value  # 将股票数记录为数据对象的股票数属性
 
-            if stock_value > 2:
-                self.target_button_ready(locate).click()
-            else:
-                # 数值不达标，直接执行数据保存
-                data_frame.record_data()
-
-
-            # 小于2不交易，还未安排执行动作
+        self.stock_judge(locate=locate)
 
 
 class LogoutMixin(ButtonMixin):
-    def logout(self, locate=None, data_frame=None):
-        data_frame.final_redord_data()
+    def logout_account(self, locate=None, data_frame=None):
+        data_frame.final_record_data()
         self.target_button_ready(locate).click()
         self.common_refresh()
         # 写死最后退出元素定位

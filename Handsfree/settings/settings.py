@@ -1,8 +1,8 @@
-from selenium import webdriver
 
-from gui.control import filename_list
 
-DRIVER = webdriver.Chrome('D:/testing/chromedriver_win32/chromedriver.exe')
+from gui.middle_transfer import filename_list
+
+DRIVER = 'D:/testing/chromedriver_win32/chromedriver.exe'
 
 URL = 'http://e-wbs.biz/'
 # URL = 'http://www.google.com/'
@@ -18,6 +18,6 @@ TOTAL_NUMBER_OF_REFRESH = 3
 
 # OPEN_FILE_NAME = filename_list[0]
 OPEN_FILE_NAME = "D:/testing/Handsfree/Handsfree/apps/WBS.xls"
-# OPEN_FILE_NAME = "D:/testing/Handsfree/Handsfree/apps/WBS208_1320_31_06.xls"
+# OPEN_FILE_NAME = "D:/testing/Handsfree/Handsfree/apps/2.xls"
 
-SAVE_FILE_NAME = "WBS2{}.xls"
+SAVE_FILE_NAME = "D:/WBS2{}.xls"

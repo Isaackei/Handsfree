@@ -1,50 +1,31 @@
 from tkinter import *
-from PIL import Image, ImageTk, ImageFilter
+from PIL import Image, ImageTk
 import tkinter.filedialog
 
 
-
-####################################
-
-
-
-# def test():
-#     get_var_1 = var_1.get()
-#     get_var_2 = var_2.get()
-#     get_var_3 = var_3.get()
-#     print("you have: {}, {}, {}".format(get_var_1, get_var_2, get_var_3))
-#
-# def xz():
-#     global FILE_NAME
-#     filename = tkinter.filedialog.askopenfilename()
-#     if filename != '':
-#         text_show.insert('end', filename)
-#         FILE_NAME = filename
-#         run()
-#     else:
-#         pass
-
-####################################
-
-
-
-def test():
+def method_for_dispatch():
+    """记录客户选择模式"""
+    # global method_tuple
     get_var_1 = var_1.get()
     get_var_2 = var_2.get()
     get_var_3 = var_3.get()
-    print("you have: {}, {}, {}".format(get_var_1, get_var_2, get_var_3))
-    # from apps.main import start
-    # start()
+    get_var_4 = var_4.get()
+    from gui.middle_transfer import first_start_up
+    first_start_up(get_var_1, get_var_2, get_var_3, get_var_4)
 
-def xz():
+
+def file_path():
+    """记录数据文件路径"""
+    global filename_list
     filename = tkinter.filedialog.askopenfilename()
     if filename != '':
         text_show.insert('end', filename)
-
-        from gui.control import run
-        run(filename)
+        from gui.middle_transfer import second_start_up
+        filename_tuple = (filename,)
+        second_start_up(*filename_tuple)
     else:
         pass
+
 
 # main
 window = Tk()
@@ -88,7 +69,6 @@ canvas.create_image(x_anchor, 40, anchor='w', image=logo_b)
 canvas.pack()
 
 # 文件路径显示
-# text_show = Text(canvas, background="#6B8E23", height=2, width=31, fg="white")
 text_show = Text(canvas, background="#8B4513", height=2, width=27, fg="white",
                      font=("Calibri", 12, "bold"))
 text_show.place(x=15, y=120)
@@ -98,7 +78,7 @@ text_show.place(x=15, y=120)
 open_file_btn = Button(
     canvas,
     text="打开文件",
-    command=xz,
+    command=file_path,
     font=("Calibri", 12, "bold"),
     relief="raised",
     activebackground="#696969   ",
@@ -132,9 +112,17 @@ mode_3_cb = Checkbutton(canvas, text="mode_3",
                         variable=var_3)
 mode_3_cb.place(x=15, y=280)
 
+#check box 4
+var_4 = IntVar()
+mode_4_cb = Checkbutton(canvas, text="mode_4",
+                        background="#D2B48C",
+                        font=("Calibri", 12),
+                        variable=var_4)
+mode_4_cb.place(x=15, y=310)
+
 # button
 show_btn = Button(canvas, text="Show",
-                  command=test)
-show_btn.place(x=15, y=320)
+                  command=method_for_dispatch)
+show_btn.place(x=15, y=350)
 
 window.mainloop()

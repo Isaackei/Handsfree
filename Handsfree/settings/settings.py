@@ -8,16 +8,16 @@ URL = 'http://e-wbs.biz/'
 # URL = 'http://www.google.com/'
 # URL = "http://www.baidu.com"
 
-WEB_WAIT_TIME = 10
+WEB_WAIT_TIME = 12
 
-TOTAL_NUMBER_OF_REFRESH = 3
+TOTAL_NUMBER_OF_REFRESH = 5
 
 
 # OPEN_FILE_NAME = "WBS.xls"
 # OPEN_FILE_NAME = "D:/testing/apps/WBS208_1020_53_16.xls"
 
-# OPEN_FILE_NAME = filename_list[0]
-OPEN_FILE_NAME = "D:/testing/Handsfree/Handsfree/apps/WBS.xls"
-# OPEN_FILE_NAME = "D:/testing/Handsfree/Handsfree/apps/2.xls"
+OPEN_FILE_NAME = filename_list[0]
+# OPEN_FILE_NAME = "D:/testing/Handsfree/Handsfree/apps/WBS.xls"
+# OPEN_FILE_NAME = "D:/WBS.xls"
 
 SAVE_FILE_NAME = "D:/WBS2{}.xls"

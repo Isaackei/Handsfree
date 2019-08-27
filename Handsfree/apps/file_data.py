@@ -38,13 +38,16 @@ class FilesData(object):
 
         # format all data
         if header_name[0] != "No.":
+            print("new")
             # rename the file
             self.create_new_file_name()
             # 重订数据格式并打开
             df_prepare.index.names = ["No."]
             df_prepare.columns = ["Username", "Password", "Password2"]
             # 新增空列表
-            df_prepare['B-stocks'] = ""
+            df_prepare['R-stocks'] = ""
+            df_prepare['XJF-stocks'] = ""
+            df_prepare['account-mark'] = ""
 
             df_prepare.to_excel(self.file_name, index=True)
             # 重新打开文件
@@ -52,6 +55,7 @@ class FilesData(object):
             self.df = pd.read_excel(self.path_of_file, dtype=str, header=0, index_col=0)
         elif header_name[0] == "No.":
             # 重新打开数据
+            print("old")
             self.df = pd.read_excel(self.path_of_file, dtype=str, header=0, index_col=0)
         else:
             # 备用
@@ -77,19 +81,21 @@ class FilesData(object):
                 "Username": self.data_length,
                 "Password": self.data_index,
                 "Password2": dt,
-                "B-stocks": self.method_mark
+                "R-stocks": self.method_mark,
+                "XJF-stocks": "",
+                "account-mark": ""
             }
             self.df.loc["config"] = config
             self.df.to_excel(self.file_name)
         finally:
             self.data_index = int(self.df.loc["config", "Password"])
             self.data_length = int(self.df.loc["config", "Username"])
-            self.method_mark = str(self.df.loc["config", "B-stocks"])
+            self.method_mark = str(self.df.loc["config", "R-stocks"])
 
     def get_user_info(self):
         """把用户信息以类实例化属性储存，元祖"""
         self.data_index = int(self.df.loc["config", "Password"])
-        self.method_mark = str(self.df.loc["config", "B-stocks"])
+        self.method_mark = str(self.df.loc["config", "R-stocks"])
         self.user_account = (
             self.df.loc[self.data_index, "Username"],
             self.df.loc[self.data_index, "Password"],
@@ -99,12 +105,13 @@ class FilesData(object):
     def record_data(self):
         """保存信息，注意，当前方法没有对索引递增"""
         """这里需要考量浮点问题"""
-        self.df.loc[self.data_index, 'B-stocks'] = self.stock_R_pin
+        self.df.loc[self.data_index, 'R-stocks'] = self.stock_R_pin
         self.df.loc["config", 'Password'] = self.data_index
         self.df.to_excel(self.file_name)
 
     def final_record_data(self):
         """最终的标记保存，其实就是递增一个索引"""
+        self.finish_flag = True
         if self.data_index < self.data_length - 1:
             self.data_index += 1
             self.df.loc["config", 'Password'] = self.data_index
@@ -114,5 +121,32 @@ class FilesData(object):
 
     def progress_point_save(self):
         """对当前进行的用户进度标记"""
-        self.df.loc["config", 'B-stocks'] = self.method_mark
+        self.df.loc["config", 'R-stocks'] = self.method_mark
+        self.df.to_excel(self.file_name)
+
+
+class SaveData(FilesData):
+
+    def __init__(self):
+        super().__init__()
+        self.R_stock_value = ""
+        self.XJF_value = ""
+
+    def save_r_stock(self):
+        """保存信息，注意，当前方法没有对索引递增"""
+        """这里需要考量浮点问题"""
+        self.df.loc[self.data_index, 'R-stocks'] = self.stock_R_pin
+        self.df.loc["config", 'Password'] = self.data_index
+        self.df.to_excel(self.file_name)
+
+    def save_xjf_value(self):
+        """现金分"""
+        self.df.loc[self.data_index, 'XJF-stocks'] = self.stock_R_pin
+        self.df.loc["config", 'Password'] = self.data_index
+        self.df.to_excel(self.file_name)
+
+    def save_account_error_mark(self):
+        """账号有误"""
+        self.df.loc[self.data_index, 'account-mark'] = "Error"
+        self.df.loc["config", 'Password'] = self.data_index
         self.df.to_excel(self.file_name)

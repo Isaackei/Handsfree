@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 
 from apps.basic import DemoSum
 
-from apps.file_data import FilesData
+from apps.file_data import FilesData, SaveData
 
 
 def file_data_startup():
@@ -10,7 +10,7 @@ def file_data_startup():
     数据文件准备
     :return: 数据实例化对象 obj
     """
-    df = FilesData()
+    df = SaveData()
     df.read_file_data()  # 读取数据文件
     df.find_data_marks()  # 第一次读取时候，获取书记标记
     return df
@@ -22,17 +22,24 @@ def web_driver_startup():
     :return: 冲浪实例化对象 obj
     """
     carrier = DemoSum()
-    carrier.get_url()
+    carrier.chinese_login_page_start()
     return carrier
 
 
 def login_process(carrier=None, data_obj=None):
     """登录"""
-    login_btn_locate = (By.XPATH, "//input[@class='button'][@type='SUBMIT'][@value=' Login ']")
+    login_btn_locate = (By.XPATH, "//input[@class='button'][@type='SUBMIT'][@value=' Login ' or @value=' 登入 ']")
     login_btn = carrier.target_button_ready(locate=login_btn_locate)
     data_obj.get_user_info()
     carrier.login_step(username=data_obj.user_account[0], password=data_obj.user_account[1])
     login_btn.click()
+    check_point = carrier.login_verify()
+    if check_point is False:
+        print("is fail")
+        data_obj.save_account_error_mark()
+        return False
+    return True
+
 
 
 def method_r_pin_stock(carrier=None, data_obj=None):
@@ -59,7 +66,41 @@ def method_r_pin_stock(carrier=None, data_obj=None):
         data_obj.record_data()
 
 
+def method_cash_point(carrier=None, data_obj=None):
+    """现金分模式"""
+    # 进入钱包界面
+    wallet_btn_locate = (By.XPATH, "/html/body/table/tbody/tr[2]/td/table/tbody/tr/td[13]/a")
+    carrier.entry_first_page_from_home(locate=wallet_btn_locate)
+
+    # 奖金分转现金分
+    price_to_cash_point_btn_locate = (By.XPATH, "/html/body/div[1]/ul/li[1]/a")
+    carrier.cash_point_judge(locate=price_to_cash_point_btn_locate, data_frame=data_obj)
+
+    if carrier.cash_point_flag:
+        # 完成数值输入，点击下一步
+        on_next_btn_locate = (By.XPATH, "/html/body/div[1]/table/tbody/tr[8]/td/input[2]")
+        carrier.cash_point_process(locate=on_next_btn_locate, data_frame=data_obj)
+
+        # 交易完成
+        complete_btn_locate = (By.XPATH, "//*[@id='Submit']/input[2]")
+        carrier.cash_point_trade_finish(locate=complete_btn_locate, data_frame=data_obj)
+
+        carrier.last_check()
+    # 等待页面刷新
+    # 或许页面数据，并判断
+    # 若达标，则进入下一步交易，点击
+        # 进入后
+        # (By.XPATH, "/html/body/div[1]/ul/li[5]/a")
+        # 判断是否有弄太子支付
+        # (By.XPATH, "/html/body/div[1]/font/b")  # 有故障，交易失败
+
+
 def logout_process(carrier=None, data_obj=None):
     """登出"""
     logout_btn_locate = (By.XPATH, "//a[@class='GLink'][contains(text(),'退出')]")
     carrier.logout_account(locate=logout_btn_locate, data_frame=data_obj)
+
+
+def method_taizi_account_set():
+    """太子手机账号绑定"""
+    #

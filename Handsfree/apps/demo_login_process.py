@@ -1,6 +1,5 @@
 from selenium.webdriver.common.by import By
 
-from apps.basic import DemoSum
 from apps.main_process import file_data_startup, web_driver_startup
 
 

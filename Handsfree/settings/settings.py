@@ -1,8 +1,6 @@
+from middle_transfer import filename_list
 
-
-from gui.middle_transfer import filename_list
-
-DRIVER = 'D:/testing/chromedriver_win32/chromedriver.exe'
+DRIVER = 'chromedriver.exe'
 
 URL = 'http://e-wbs.biz/'
 # URL = 'http://www.google.com/'
@@ -20,4 +18,4 @@ OPEN_FILE_NAME = filename_list[0]
 # OPEN_FILE_NAME = "D:/testing/Handsfree/Handsfree/apps/WBS.xls"
 # OPEN_FILE_NAME = "D:/WBSxls"
 
-SAVE_FILE_NAME = ":/WBS2{}.xls"
+SAVE_FILE_NAME = "D:/WBS2{}.xls"

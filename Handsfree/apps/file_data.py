@@ -1,5 +1,7 @@
 import datetime
-
+import numpy.random.common
+import numpy.random.bounded_integers
+import numpy.random.entropy
 import pandas as pd
 
 from settings.settings import SAVE_FILE_NAME, OPEN_FILE_NAME
@@ -38,7 +40,6 @@ class FilesData(object):
 
         # format all data
         if header_name[0] != "No.":
-            print("new")
             # rename the file
             self.create_new_file_name()
             # 重订数据格式并打开
@@ -55,11 +56,11 @@ class FilesData(object):
             self.df = pd.read_excel(self.path_of_file, dtype=str, header=0, index_col=0)
         elif header_name[0] == "No.":
             # 重新打开数据
-            print("old")
+
             self.df = pd.read_excel(self.path_of_file, dtype=str, header=0, index_col=0)
         else:
             # 备用
-            print("data wrong")
+            pass
 
     def find_data_marks(self):
         """

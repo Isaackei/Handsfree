@@ -1,6 +1,6 @@
 from apps.main_dispatch import Dispatch
 from apps.main_process import web_driver_startup, file_data_startup
-from gui.middle_transfer import method_tuple
+from middle_transfer import method_tuple
 
 
 def main_start():

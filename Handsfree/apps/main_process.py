@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 
 from apps.basic import DemoSum
 
-from apps.file_data import FilesData, SaveData
+from apps.file_data import SaveData
 
 
 def file_data_startup():

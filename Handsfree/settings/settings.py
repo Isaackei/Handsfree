@@ -1,4 +1,4 @@
-from middle_transfer import filename_list
+from middle_transfer import filename_list, filename_list2
 
 DRIVER = 'chromedriver.exe'
 
@@ -18,4 +18,4 @@ OPEN_FILE_NAME = filename_list[0]
 # OPEN_FILE_NAME = "D:/testing/Handsfree/Handsfree/apps/WBS.xls"
 # OPEN_FILE_NAME = "D:/WBSxls"
 
-SAVE_FILE_NAME = "D:/WBS2{}.xls"
+SAVE_FILE_NAME = filename_list2[0] + "/WBS2{}.xls"

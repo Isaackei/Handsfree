@@ -35,7 +35,6 @@ def login_process(carrier=None, data_obj=None):
     login_btn.click()
     check_point = carrier.login_verify()
     if check_point is False:
-        print("is fail")
         data_obj.save_account_error_mark()
         return False
     return True

@@ -27,13 +27,26 @@ def file_path():
         pass
 
 
+def file_path2():
+    """记录数据文件路径"""
+    global filename_list2
+    file = tkinter.filedialog.askdirectory()
+    if file != '':
+        text_show2.insert('end', file)
+        from middle_transfer import second_start_up2
+        filename_tuple2 = (file,)
+        second_start_up2(*filename_tuple2)
+    else:
+        pass
+
+
 # main
 window = Tk()
 window.title("Witcher: Wild Hunt")
 window.configure(background="black")
 
 # photo image for background
-img = Image.open("D:/testing/parts/blood_and_wine2.jpg")
+img = Image.open("./parts/blood_and_wine2.jpg")
 img_size = img.size
 w_img = int(img_size[0] * 0.45)
 h_img = int(img_size[1] * 0.45)
@@ -52,7 +65,7 @@ frame_main = Frame(window)
 frame_main.place(x=x_frame, y=y_frame)
 
 # logo
-logo = Image.open("D:/testing/parts/logo1.png")
+logo = Image.open("./parts/logo1.png")
 logo_size = logo.size
 w_logo = logo_size[0]
 h_logo = logo_size[1]
@@ -73,8 +86,6 @@ text_show = Text(canvas, background="#8B4513", height=2, width=27, fg="white",
                      font=("Calibri", 12, "bold"))
 text_show.place(x=15, y=120)
 
-# lb = Label(canvas, text='')
-# lb.place(x=30, y=130)
 open_file_btn = Button(
     canvas,
     text="打开文件",
@@ -98,7 +109,7 @@ mode_1_cb.place(x=15, y=220)
 
 # check box 2
 var_2 = IntVar()
-mode_2_cb = Checkbutton(canvas, text="现金分",
+mode_2_cb = Checkbutton(canvas, text="奖转现金分",
                         background="#D2B48C",
                         font=("Calibri", 12),
                         variable=var_2)
@@ -110,7 +121,7 @@ mode_3_cb = Checkbutton(canvas, text="mode_3",
                         background="#D2B48C",
                         font=("Calibri", 12),
                         variable=var_3)
-mode_3_cb.place(x=15, y=280)
+mode_3_cb.place(x=130, y=220)
 
 #check box 4
 var_4 = IntVar()
@@ -118,11 +129,29 @@ mode_4_cb = Checkbutton(canvas, text="mode_4",
                         background="#D2B48C",
                         font=("Calibri", 12),
                         variable=var_4)
-mode_4_cb.place(x=15, y=310)
+mode_4_cb.place(x=130, y=250)
+
+# 文件路径显示
+text_show2 = Text(canvas, background="#8B4513", height=2, width=27, fg="white",
+                     font=("Calibri", 12, "bold"))
+text_show2.place(x=15, y=280)
+
+open_file_btn = Button(
+    canvas,
+    text="保存路径",
+    command=file_path2,
+    font=("Calibri", 12, "bold"),
+    relief="raised",
+    activebackground="#696969   ",
+    activeforeground="#F5F5F5"
+)
+
+# btn.pack()
+open_file_btn.place(x=15, y=325)
 
 # button
 show_btn = Button(canvas, text="开始",
                   command=method_for_dispatch)
-show_btn.place(x=15, y=350)
+show_btn.place(x=15, y=365)
 
 window.mainloop()

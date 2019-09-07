@@ -40,6 +40,7 @@ class FilesData(object):
 
         # format all data
         if header_name[0] != "No.":
+            print("new file")
             # rename the file
             self.create_new_file_name()
             # 重订数据格式并打开
@@ -55,6 +56,7 @@ class FilesData(object):
             self.path_of_file = pd.ExcelFile(self.file_name)
             self.df = pd.read_excel(self.path_of_file, dtype=str, header=0, index_col=0)
         elif header_name[0] == "No.":
+            print("old file")
             # 重新打开数据
 
             self.df = pd.read_excel(self.path_of_file, dtype=str, header=0, index_col=0)
@@ -74,6 +76,7 @@ class FilesData(object):
         try:
             print(self.df.loc["config"])
         except:
+            print("no mark")
             self.old_file_mark_flag = False
             self.data_length = len(self.df)
             dt = datetime.datetime.now().strftime('%Y-%m-%d%H:%M:%S')
@@ -130,8 +133,8 @@ class SaveData(FilesData):
 
     def __init__(self):
         super().__init__()
-        self.R_stock_value = ""
-        self.XJF_value = ""
+        self.R_stock_value = None
+        self.XJF_value = None
 
     def save_r_stock(self):
         """保存信息，注意，当前方法没有对索引递增"""
@@ -142,7 +145,7 @@ class SaveData(FilesData):
 
     def save_xjf_value(self):
         """现金分"""
-        self.df.loc[self.data_index, 'XJF-stocks'] = self.stock_R_pin
+        self.df.loc[self.data_index, 'XJF-stocks'] = self.XJF_value
         self.df.loc["config", 'Password'] = self.data_index
         self.df.to_excel(self.file_name)
 

@@ -161,7 +161,7 @@ class StockModeAMixin(ButtonMixin):
     def stock_judge(self, locate=None):
         """判断数值是否达标"""
         self.stock_flag = False
-        if float(self.stock_value) > 2:
+        if float(self.stock_value) > 10:
             self.stock_flag = True
             self.target_button_ready(locate).click()
 
@@ -218,8 +218,8 @@ class CashPointMixin(ButtonMixin):
                 self.common_refresh()
                 self.target_button_ready(locate=locate).click()
             else:
-                data_frame.stock_R_pin = str(self.cash_point)
-                data_frame.record_data()
+                data_frame.XJF_value = str(self.cash_point)
+                data_frame.save_xjf_value()
 
     def cash_point_process(self, data_frame=None, locate=None):
         self.common_refresh()
@@ -234,8 +234,8 @@ class CashPointMixin(ButtonMixin):
     def cash_point_trade_finish(self, locate=None, data_frame=None):
         self.common_refresh()
         self.target_button_ready(locate=locate).click()
-        data_frame.stock_R_pin = str(self.cash_point_trade)
-        data_frame.record_data()
+        data_frame.XJF_value = str(self.cash_point_trade)
+        data_frame.save_xjf_value()
 
     def last_check(self):
         self.common_refresh()

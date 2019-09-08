@@ -50,15 +50,14 @@ class FilesData(object):
             df_prepare['R-stocks'] = ""
             df_prepare['XJF-stocks'] = ""
             df_prepare['account-mark'] = ""
+            df_prepare['TaiZhi-phone'] = ""
 
             df_prepare.to_excel(self.file_name, index=True)
             # 重新打开文件
             self.path_of_file = pd.ExcelFile(self.file_name)
             self.df = pd.read_excel(self.path_of_file, dtype=str, header=0, index_col=0)
         elif header_name[0] == "No.":
-            print("old file")
             # 重新打开数据
-
             self.df = pd.read_excel(self.path_of_file, dtype=str, header=0, index_col=0)
         else:
             # 备用
@@ -87,7 +86,8 @@ class FilesData(object):
                 "Password2": dt,
                 "R-stocks": self.method_mark,
                 "XJF-stocks": "",
-                "account-mark": ""
+                "account-mark": "",
+                "TaiZhi-phone": ""
             }
             self.df.loc["config"] = config
             self.df.to_excel(self.file_name)
@@ -128,6 +128,11 @@ class FilesData(object):
         self.df.loc["config", 'R-stocks'] = self.method_mark
         self.df.to_excel(self.file_name)
 
+    # def progress_point_save_2(self):
+    #     """对当前进行的用户进度标记"""
+    #     self.df.loc["config", 'R-stocks'] = self.method_mark_str
+    #     self.df.to_excel(self.file_name)
+
 
 class SaveData(FilesData):
 
@@ -152,5 +157,17 @@ class SaveData(FilesData):
     def save_account_error_mark(self):
         """账号有误"""
         self.df.loc[self.data_index, 'account-mark'] = "Error"
+        self.df.loc["config", 'Password'] = self.data_index
+        self.df.to_excel(self.file_name)
+
+    def save_secondary_password_error(self):
+        """二级密码有误"""
+        self.df.loc[self.data_index, 'account-mark'] = "Error2"
+        self.df.loc["config", 'Password'] = self.data_index
+        self.df.to_excel(self.file_name)
+
+    def save_phone_number(self, phone_num):
+        """太子支付手机号码记录"""
+        self.df.loc[self.data_index, 'TaiZhi-phone'] = phone_num
         self.df.loc["config", 'Password'] = self.data_index
         self.df.to_excel(self.file_name)

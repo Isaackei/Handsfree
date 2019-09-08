@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium import webdriver
 
-from settings.settings import DRIVER, URL, TOTAL_NUMBER_OF_REFRESH, WEB_WAIT_TIME
+from settings.settings import DRIVER, URL, TOTAL_NUMBER_OF_REFRESH, WEB_WAIT_TIME, PHONE_NUMBER
 
 
 class Basic(object):
@@ -241,11 +241,63 @@ class CashPointMixin(ButtonMixin):
         self.common_refresh()
 
 
+class PhoneNumberSetting(ButtonMixin):
+    """太子支付手机号码设置"""
+    def __init__(self):
+        super().__init__()
+        self.phone_number = PHONE_NUMBER
+
+    def secondary_password_verification(self):
+        """判断二级密码是否正确"""
+        self.common_refresh()
+        error_locate = "//div[@class='bodydoc']//font[@color='red']//b[contains(text(), '故障')]"
+        try:
+            self.driver.find_element_by_xpath(error_locate)
+        except:
+            return True
+        # 出现故障
+        return False
+
+    def enter_setting(self, data_frame=None):
+        # ‘选项’路径
+        setting_btn_locate = (By.XPATH, "/html/body/table/tbody/tr[2]/td/table/tbody/tr/td[19]/a")
+        self.target_button_ready(locate=setting_btn_locate).click()
+        self.common_refresh()
+        # ‘账户设置路径’
+        account_setting_btn_locate = (By.XPATH, "/html/body/div[1]/ul/li[1]/a")
+        self.target_button_ready(locate=account_setting_btn_locate).click()
+        self.common_refresh()
+        # 二级密码定位
+        secondary_password_locate = ("/html/body/div[1]/div[2]/form/table/tbody/tr[2]/td/input[1]")
+        self.driver.find_element_by_xpath(secondary_password_locate).send_keys(data_frame.user_account[2])
+        # ‘下一步’按钮定位
+        next_btn_locate = (By.XPATH, "/html/body/div[1]/div[2]/form/table/tbody/tr[2]/td/input[2]")
+        self.target_button_ready(locate=next_btn_locate).click()
+        self.common_refresh()
+        check_point = self.secondary_password_verification()
+        return check_point
+
+    def get_phone_number(self, data_frame=None):
+        """查找太子支付手机号码"""
+        # 太子支付手机号码定位
+        phone_number_locate = "//td[@class='tdc']//input[@type='TEXT' and @name='TZN']"
+        phone_number_value = self.driver.find_element_by_xpath(phone_number_locate).get_attribute("value")
+        if phone_number_value == "":  # 没有设置支付号码
+            self.driver.find_element_by_xpath(phone_number_locate).send_keys(self.phone_number)
+            # 提交按钮
+            submit_btn_locate = (By.XPATH, "/html/body/div[1]/table/tbody/tr[30]/td/input[2]")
+            self.target_button_ready(locate=submit_btn_locate).click()
+            self.common_refresh()
+            data_frame.save_phone_number(phone_num=self.phone_number)
+        else:  # 已设置了支付号码，执行记录
+            data_frame.save_phone_number(phone_num=phone_number_value)
+
+
 class DemoOne(ButtonMixin):
     pass
 
 
-class DemoTwo(LoginMixin, StockModeAMixin, LogoutMixin, CashPointMixin):
+class DemoTwo(LoginMixin, StockModeAMixin, LogoutMixin, CashPointMixin, PhoneNumberSetting):
     pass
 
 

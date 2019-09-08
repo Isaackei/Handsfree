@@ -3,12 +3,21 @@
 filename_list = []
 filename_list2 = []
 method_tuple = None
+phone_number = None  # 太子支付手机号码
 #######################
 
 
-def first_start_up(*args):
+def first_start_up(*args, **kwargs):
     global method_tuple
+    global phone_number
     method_tuple = args
+    phone_number = kwargs["phone_number"]
+    from tkinter import messagebox
+    from sys import exit
+    if (method_tuple[2] == 1) and (phone_number == ""):
+        messagebox.showinfo("报错", "请重新打开软件，因为您忘记输入太子支付手机号码")
+        exit()
+
     from apps.main import main_start
     main_start()
 

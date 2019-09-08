@@ -40,7 +40,6 @@ def login_process(carrier=None, data_obj=None):
     return True
 
 
-
 def method_r_pin_stock(carrier=None, data_obj=None):
     """重消股模式"""
     carrier.common_refresh()
@@ -100,6 +99,11 @@ def logout_process(carrier=None, data_obj=None):
     carrier.logout_account(locate=logout_btn_locate, data_frame=data_obj)
 
 
-def method_taizi_account_set():
+def method_taizi_account_set(carrier=None, data_frame=None):
     """太子手机账号绑定"""
-    #
+    check_point_1 = carrier.enter_setting(data_frame=data_frame)
+    if check_point_1 is False:
+        data_frame.save_secondary_password_error()
+        return
+    carrier.get_phone_number(data_frame=data_frame)
+

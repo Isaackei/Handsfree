@@ -1,4 +1,4 @@
-from apps.main_process import login_process, method_cash_point, method_r_pin_stock
+from apps.main_process import login_process, method_cash_point, method_r_pin_stock, method_taizi_account_set
 
 
 class Dispatch(object):
@@ -7,21 +7,25 @@ class Dispatch(object):
         self.method_mark = args
         self.method_mark_tmp = None
         self.method_mark_str = ""
+        self.method_mark_global = None
 
     def transfer_method_status(self):
         """将客户选用模式 转换成 字符串 string 模式"""
         self.method_mark_str = ""
         for i in self.method_mark:
             self.method_mark_str += str(i)
+        self.method_mark_global = self.method_mark_str
 
     def dispatcher_process(self, obj=None, carrier=None, data_obj=None):
         """判断客户选择的模式，并执行对应功能"""
         self.transfer_method_status()
+        data_obj.method_mark = self.method_mark_str
+        data_obj.progress_point_save()
         for index in range(len(self.method_mark)):
             method = 'method_{}'.format(index)
             if self.method_mark[index]:
                 globals()[method](obj, carrier, data_obj)
-        last_step(carrier=carrier, data_obj=data_obj)
+        last_step(carrier=carrier, data_obj=data_obj, obj=obj)
 
     def dispatcher_process_for_last_time(self, obj=None, carrier=None, data_obj=None):
         """判断客户选择的模式，并执行对应功能"""
@@ -31,7 +35,7 @@ class Dispatch(object):
             method = 'method_{}'.format(index)
             if self.method_mark_tmp[index] in ["1"]:
                 globals()[method](obj, carrier, data_obj)
-        last_step(carrier=carrier, data_obj=data_obj)
+        last_step(carrier=carrier, data_obj=data_obj, obj=obj)
         data_obj.old_file_mark_flag = False
 
     def overall_process(self, obj=None, carrier=None, data_obj=None):
@@ -55,7 +59,6 @@ class Dispatch(object):
 
 def method_0(obj, carrier, data_obj):
     """买重消股模式"""
-
     method_r_pin_stock(carrier, data_obj)
     obj.method_mark_str = "0" + obj.method_mark_str[1:]
     data_obj.method_mark = obj.method_mark_str
@@ -70,10 +73,10 @@ def method_1(obj, carrier, data_obj):
 
 
 def method_2(obj, carrier, data_obj):
-    print(obj.method_mark)
+    method_taizi_account_set(carrier=carrier, data_frame=data_obj)
     obj.method_mark_str = "000" + obj.method_mark_str[3:]
-    print(obj.method_mark_str)
-    print("==================")
+    data_obj.method_mark = obj.method_mark_str
+    data_obj.progress_point_save()
 
 
 def method_3(obj, carrier, data_obj):
@@ -83,6 +86,8 @@ def method_3(obj, carrier, data_obj):
     print("==================")
 
 
-def last_step(carrier=None, data_obj=None):
+def last_step(carrier=None, data_obj=None, obj=None):
+    data_obj.method_mark = obj.method_mark_global
+    data_obj.progress_point_save()
     from apps.main_process import logout_process
     logout_process(carrier=carrier, data_obj=data_obj)

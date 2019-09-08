@@ -10,8 +10,9 @@ def method_for_dispatch():
     get_var_2 = var_2.get()
     get_var_3 = var_3.get()
     get_var_4 = var_4.get()
+    get_var_5 = phone_text.get()
     from middle_transfer import first_start_up
-    first_start_up(get_var_1, get_var_2, get_var_3, get_var_4)
+    first_start_up(get_var_1, get_var_2, get_var_3, get_var_4, phone_number=get_var_5)
 
 
 def file_path():
@@ -42,7 +43,7 @@ def file_path2():
 
 # main
 window = Tk()
-window.title("Witcher: Wild Hunt")
+window.title("HandsFree")
 window.configure(background="black")
 
 # photo image for background
@@ -82,76 +83,83 @@ canvas.create_image(x_anchor, 40, anchor='w', image=logo_b)
 canvas.pack()
 
 # 文件路径显示
-text_show = Text(canvas, background="#8B4513", height=2, width=27, fg="white",
+text_show = Text(canvas, background="#8B4513", height=1, width=27, fg="white",
                      font=("Calibri", 12, "bold"))
-text_show.place(x=15, y=120)
+text_show.place(x=15, y=80)
 
 open_file_btn = Button(
     canvas,
     text="打开文件",
     command=file_path,
-    font=("Calibri", 12, "bold"),
+    font=("Calibri", 10, "bold"),
     relief="raised",
     activebackground="#696969   ",
     activeforeground="#F5F5F5"
 )
 
 # btn.pack()
-open_file_btn.place(x=15, y=175)
+open_file_btn.place(x=15, y=110)
 
 # check box1
 var_1 = IntVar()
 mode_1_cb = Checkbutton(canvas, text="重消",
                         background="#D2B48C",
-                        font=("Calibri", 12),
+                        font=("Calibri", 10),
                         variable=var_1)
-mode_1_cb.place(x=15, y=220)
+mode_1_cb.place(x=15, y=140)
 
 # check box 2
 var_2 = IntVar()
 mode_2_cb = Checkbutton(canvas, text="奖转现金分",
                         background="#D2B48C",
-                        font=("Calibri", 12),
+                        font=("Calibri", 10),
                         variable=var_2)
-mode_2_cb.place(x=15, y=250)
+mode_2_cb.place(x=15, y=170)
 
 #check box 3
 var_3 = IntVar()
-mode_3_cb = Checkbutton(canvas, text="mode_3",
+mode_3_cb = Checkbutton(canvas, text="太子支付手机设置",
                         background="#D2B48C",
-                        font=("Calibri", 12),
+                        font=("Calibri", 10),
                         variable=var_3)
-mode_3_cb.place(x=130, y=220)
+mode_3_cb.place(x=15, y=200)
+
+# phone input
+explan = Label(canvas, text="太子账号:")
+explan.place(x=15, y=230)
+phone_text = StringVar()
+phone_input = Entry(canvas, textvariable=phone_text)
+phone_input.place(x=80, y=230)
 
 #check box 4
 var_4 = IntVar()
 mode_4_cb = Checkbutton(canvas, text="mode_4",
                         background="#D2B48C",
-                        font=("Calibri", 12),
+                        font=("Calibri", 10),
                         variable=var_4)
-mode_4_cb.place(x=130, y=250)
+mode_4_cb.place(x=15, y=260)
 
 # 文件路径显示
-text_show2 = Text(canvas, background="#8B4513", height=2, width=27, fg="white",
+text_show2 = Text(canvas, background="#8B4513", height=1, width=27, fg="white",
                      font=("Calibri", 12, "bold"))
-text_show2.place(x=15, y=280)
+text_show2.place(x=15, y=290)
 
 open_file_btn = Button(
     canvas,
     text="保存路径",
     command=file_path2,
-    font=("Calibri", 12, "bold"),
+    font=("Calibri", 10, "bold"),
     relief="raised",
     activebackground="#696969   ",
     activeforeground="#F5F5F5"
 )
 
 # btn.pack()
-open_file_btn.place(x=15, y=325)
+open_file_btn.place(x=15, y=320)
 
 # button
 show_btn = Button(canvas, text="开始",
                   command=method_for_dispatch)
-show_btn.place(x=15, y=365)
+show_btn.place(x=15, y=350)
 
 window.mainloop()

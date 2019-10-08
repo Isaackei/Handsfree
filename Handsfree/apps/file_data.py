@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import numpy.random.common
 import numpy.random.bounded_integers
 import numpy.random.entropy
@@ -20,13 +20,14 @@ class FilesData(object):
         self.data_index = None
         self.data_length = None
         self.stock_R_pin = None
-        self.method_mark = "1111"
+        self.method_mark = None
         self.old_file_mark_flag = True
         self.finish_flag = True
+        self.dt = None
 
     def create_new_file_name(self):
         """格式化新文件名"""
-        dt = datetime.datetime.now().strftime('%m_%d%H_%M_%S')
+        dt = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
         self.file_name = self.new_file_name_format.format(dt)
 
     def read_file_data(self):
@@ -78,12 +79,12 @@ class FilesData(object):
             print("no mark")
             self.old_file_mark_flag = False
             self.data_length = len(self.df)
-            dt = datetime.datetime.now().strftime('%Y-%m-%d%H:%M:%S')
+            self.dt = datetime.now().strftime('%Y-%m-%d:%H:%M:%S')
             self.data_index = 0
             config = {
                 "Username": self.data_length,
                 "Password": self.data_index,
-                "Password2": dt,
+                "Password2": self.dt,
                 "R-stocks": self.method_mark,
                 "XJF-stocks": "",
                 "account-mark": "",
@@ -166,8 +167,13 @@ class SaveData(FilesData):
         self.df.loc["config", 'Password'] = self.data_index
         self.df.to_excel(self.file_name)
 
-    def save_phone_number(self, phone_num):
+    def save_phone_number(self, phone_num=None):
         """太子支付手机号码记录"""
         self.df.loc[self.data_index, 'TaiZhi-phone'] = phone_num
+        self.df.loc["config", 'Password'] = self.data_index
+        self.df.to_excel(self.file_name)
+
+    def save_information_data(self, info_data=None):
+        self.df.loc[self.data_index, 'XJF-stocks'] = info_data
         self.df.loc["config", 'Password'] = self.data_index
         self.df.to_excel(self.file_name)

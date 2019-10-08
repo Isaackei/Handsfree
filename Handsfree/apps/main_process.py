@@ -67,7 +67,7 @@ def method_r_pin_stock(carrier=None, data_obj=None):
 def method_cash_point(carrier=None, data_obj=None):
     """现金分模式"""
     # 进入钱包界面
-    wallet_btn_locate = (By.XPATH, "/html/body/table/tbody/tr[2]/td/table/tbody/tr/td[13]/a")
+    wallet_btn_locate = (By.XPATH, "/html/body/a[7]")
     carrier.entry_first_page_from_home(locate=wallet_btn_locate)
 
     # 奖金分转现金分
@@ -95,8 +95,7 @@ def method_cash_point(carrier=None, data_obj=None):
 
 def logout_process(carrier=None, data_obj=None):
     """登出"""
-    logout_btn_locate = (By.XPATH, "//a[@class='GLink'][contains(text(),'退出')]")
-    carrier.logout_account(locate=logout_btn_locate, data_frame=data_obj)
+    carrier.logout_account(data_frame=data_obj)
 
 
 def method_taizi_account_set(carrier=None, data_frame=None):
@@ -107,3 +106,21 @@ def method_taizi_account_set(carrier=None, data_frame=None):
         return
     carrier.get_phone_number(data_frame=data_frame)
 
+
+def method_force_taizi_account_set(carrier=None, data_frame=None):
+    """太子手机账号绑定"""
+    check_point_1 = carrier.f_enter_setting(data_frame=data_frame)
+    if check_point_1 is False:
+        data_frame.save_secondary_password_error()
+        return
+    carrier.f_get_phone_number(data_frame=data_frame)
+
+
+def method_cash_point_transfer_taizhi(carrier=None, data_frame=None):
+    """现金分转太子提现"""
+    carrier.cash_point_to_taizhi(data_frame=data_frame)
+
+
+def method_information_record(carrier=None, data_frame=None):
+    """记录信息"""
+    carrier.register_time(data_frame=data_frame)

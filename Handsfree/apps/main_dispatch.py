@@ -1,4 +1,5 @@
-from apps.main_process import login_process, method_cash_point, method_r_pin_stock, method_taizi_account_set
+from apps.main_process import login_process, method_cash_point, method_r_pin_stock, method_taizi_account_set, \
+    method_force_taizi_account_set, method_cash_point_transfer_taizhi, method_information_record
 
 
 class Dispatch(object):
@@ -80,10 +81,24 @@ def method_2(obj, carrier, data_obj):
 
 
 def method_3(obj, carrier, data_obj):
-    print(obj.method_mark)
-    obj.method_mark_str = "0000"
-    print(obj.method_mark_str)
-    print("==================")
+    method_force_taizi_account_set(carrier=carrier, data_frame=data_obj)
+    obj.method_mark_str = "0000" + obj.method_mark_str[4:]
+    data_obj.method_mark = obj.method_mark_str
+    data_obj.progress_point_save()
+
+
+def method_4(obj, carrier, data_obj):
+    method_cash_point_transfer_taizhi(carrier=carrier, data_frame=data_obj)
+    obj.method_mark_str = "00000" + obj.method_mark_str[5:]
+    data_obj.method_mark = obj.method_mark_str
+    data_obj.progress_point_save()
+
+
+def method_5(obj, carrier, data_obj):
+    method_information_record(carrier=carrier, data_frame=data_obj)
+    obj.method_mark_str = "000000"
+    data_obj.method_mark = obj.method_mark_str
+    data_obj.progress_point_save()
 
 
 def last_step(carrier=None, data_obj=None, obj=None):
@@ -91,3 +106,4 @@ def last_step(carrier=None, data_obj=None, obj=None):
     data_obj.progress_point_save()
     from apps.main_process import logout_process
     logout_process(carrier=carrier, data_obj=data_obj)
+

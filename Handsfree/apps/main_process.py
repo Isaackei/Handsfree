@@ -42,26 +42,27 @@ def login_process(carrier=None, data_obj=None):
 
 def method_r_pin_stock(carrier=None, data_obj=None):
     """重消股模式"""
-    carrier.common_refresh()
-    trade_btn_locate = (By.XPATH, "//a[@class='GLink'][text()='交易']")
-    trade_btn = carrier.target_button_ready(trade_btn_locate)
-    trade_btn.click()
-    # step two
-    r_pin_btn_locate = (By.XPATH, "//a[contains(text(),'重消贷款')][contains(text(),'重消') or text()='买 (重消贷款)']")
-    r_pin_btn = carrier.target_button_ready(r_pin_btn_locate)
-    r_pin_btn.click()
-    # 进入交易流程，当前位置为交易数值输入（寻找‘下一步’跳转）
-    carrier.common_refresh()
-    next_btn_locate = (By.XPATH, "//input[@class='button'][@type='SUBMIT']")
-    carrier.buy_load_stocks(locate=next_btn_locate, data_frame=data_obj)
-    if carrier.stock_flag:
-        carrier.common_refresh()  # 若点了下一步的情况，（寻找‘完成’跳转）
-        complete_btn_locate = (By.XPATH, "//input[@class='button'][@type='BUTTON'][@onclick='Go()']")
-        carrier.complete_buy_load_stocks(locate=complete_btn_locate, data_frame=data_obj)
-        # 续上步，完成后页面判断
-        carrier.common_refresh()
-    else:
-        data_obj.record_data()
+    carrier.buy_load_stocks_mode(data_frame=data_obj)
+    # carrier.common_refresh()
+    # trade_btn_locate = (By.XPATH, "//a[@class='GLink'][text()='交易']")
+    # trade_btn = carrier.target_button_ready(trade_btn_locate)
+    # trade_btn.click()
+    # # step two
+    # r_pin_btn_locate = (By.XPATH, "//a[contains(text(),'重消贷款')][contains(text(),'重消') or text()='买 (重消贷款)']")
+    # r_pin_btn = carrier.target_button_ready(r_pin_btn_locate)
+    # r_pin_btn.click()
+    # # 进入交易流程，当前位置为交易数值输入（寻找‘下一步’跳转）
+    # carrier.common_refresh()
+    # next_btn_locate = (By.XPATH, "//input[@class='button'][@type='SUBMIT']")
+    # carrier.buy_load_stocks(locate=next_btn_locate, data_frame=data_obj)
+    # if carrier.stock_flag:
+    #     carrier.common_refresh()  # 若点了下一步的情况，（寻找‘完成’跳转）
+    #     complete_btn_locate = (By.XPATH, "//input[@class='button'][@type='BUTTON'][@onclick='Go()']")
+    #     carrier.complete_buy_load_stocks(locate=complete_btn_locate, data_frame=data_obj)
+    #     # 续上步，完成后页面判断
+    #     carrier.common_refresh()
+    # else:
+    #     data_obj.record_data()
 
 
 def method_cash_point(carrier=None, data_obj=None):
@@ -122,5 +123,10 @@ def method_cash_point_transfer_taizhi(carrier=None, data_frame=None):
 
 
 def method_information_record(carrier=None, data_frame=None):
-    """记录信息"""
+    """记录用户信息"""
     carrier.register_time(data_frame=data_frame)
+
+
+def method_sell_stock(carrier=None, data_frame=None):
+    """卖股流程"""
+    carrier.sell_stock(data_frame=data_frame)

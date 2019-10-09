@@ -12,9 +12,17 @@ def method_for_dispatch():
     get_var_4 = var_4.get()
     get_var_5 = var_5.get()
     get_var_6 = var_6.get()
+    get_var_7 = var_7.get()
     get_var_number = phone_text.get()
     from middle_transfer import first_start_up
-    first_start_up(get_var_1, get_var_2, get_var_3, get_var_4, get_var_5, get_var_6, phone_number=get_var_number)
+    first_start_up(get_var_1,
+                   get_var_2,
+                   get_var_3,
+                   get_var_4,
+                   get_var_5,
+                   get_var_6,
+                   get_var_7,
+                   phone_number=get_var_number)
 
 
 def file_path():
@@ -104,7 +112,7 @@ open_file_btn.place(x=15, y=110)
 
 # check box1
 var_1 = IntVar()
-mode_1_cb = Checkbutton(canvas, text="重消",
+mode_1_cb = Checkbutton(canvas, text="买重消",
                         background="#D2B48C",
                         font=("Calibri", 10),
                         variable=var_1)
@@ -154,6 +162,13 @@ mode_6_cb = Checkbutton(canvas, text="信息记录",
                         font=("Calibri", 10),
                         variable=var_6)
 mode_6_cb.place(x=150, y=260)
+
+var_7 = IntVar()
+mode_7_cb = Checkbutton(canvas, text="卖重消/股",
+                        background="#D2B48C",
+                        font=("Calibri", 10),
+                        variable=var_7)
+mode_7_cb.place(x=150, y=140)
 
 # 文件路径显示
 text_show2 = Text(canvas, background="#8B4513", height=1, width=27, fg="white",

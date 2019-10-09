@@ -52,6 +52,8 @@ class FilesData(object):
             df_prepare['XJF-stocks'] = ""
             df_prepare['account-mark'] = ""
             df_prepare['TaiZhi-phone'] = ""
+            df_prepare['UserInfo'] = ""
+            df_prepare['Sale-stock'] = ""
 
             df_prepare.to_excel(self.file_name, index=True)
             # 重新打开文件
@@ -88,7 +90,9 @@ class FilesData(object):
                 "R-stocks": self.method_mark,
                 "XJF-stocks": "",
                 "account-mark": "",
-                "TaiZhi-phone": ""
+                "TaiZhi-phone": "",
+                "UserInfo": "",
+                "Sale-stock": "",
             }
             self.df.loc["config"] = config
             self.df.to_excel(self.file_name)
@@ -174,6 +178,18 @@ class SaveData(FilesData):
         self.df.to_excel(self.file_name)
 
     def save_information_data(self, info_data=None):
-        self.df.loc[self.data_index, 'XJF-stocks'] = info_data
+        self.df.loc[self.data_index, 'UserInfo'] = info_data
+        self.df.loc["config", 'Password'] = self.data_index
+        self.df.to_excel(self.file_name)
+
+    def save_sell_stock(self, stock_data=None):
+        """卖股"""
+        self.df.loc[self.data_index, 'Sale-stock'] = stock_data
+        self.df.loc["config", 'Password'] = self.data_index
+        self.df.to_excel(self.file_name)
+
+    def save_chongxiao_stock(self, chongxiao_stock=None):
+        """买重消股"""
+        self.df.loc[self.data_index, 'R-stocks'] = chongxiao_stock
         self.df.loc["config", 'Password'] = self.data_index
         self.df.to_excel(self.file_name)

@@ -61,6 +61,10 @@ class Basic(object):
 
 class ButtonMixin(Basic):
 
+    def __init__(self):
+        super().__init__()
+        self.trading_button_locate = "/html/body/a[9]"  # 交易按钮
+
     def target_button_ready(self, locate=None):
         """
         判断目标按钮加载情况
@@ -81,6 +85,10 @@ class ButtonMixin(Basic):
     def entry_first_page_from_home(self, locate=None):
         """从主页前往第一层页面"""
         self.target_button_ready(locate=locate).click()
+
+    def button_ready_and_click(self, locate=None):
+        """按钮就绪并点击"""
+        self.target_button_ready(locate=(By.XPATH, locate))
 
     def chinese_login_page_start(self):
         self.get_url()
@@ -152,39 +160,61 @@ class LoginMixin(ButtonMixin):
 
 
 class StockModeAMixin(ButtonMixin):
-    """重消股"""
+    """买重消股"""
     def __init__(self):
         super().__init__()
         self.stock_flag = False
         self.stock_value = None
         self.r_stock_value_locate = "//input[@type='TEXT' and @name='Amount']"
+        self.buy_chongxiao_button_locate = "/html/body/div[1]/a[4]"
+        self.chongxiao_target_value_locate = "/html/body/div[1]/table[1]/tbody/tr[9]/td/input"
+        self.chongxiao_next_step_button_locate = "/html/body/div[1]/table[1]/tbody/tr[10]/td/input[2]"
+        self.chongxiao_complete_button_locate = "//*[@id='Submit']/input[2]"
 
-    def complete_buy_load_stocks(self, locate=None, data_frame=None):
-        """完成重消股购买，并记录数据"""
-        self.target_button_ready(locate).click()
-        data_frame.record_data()
+    # def complete_buy_load_stocks(self, locate=None, data_frame=None):
+    #     """完成重消股购买，并记录数据"""
+    #     self.target_button_ready(locate).click()
+    #     data_frame.record_data()
+    #
+    # def stock_judge(self, locate=None):
+    #     """判断数值是否达标"""
+    #     self.stock_flag = False
+    #     if float(self.stock_value) > 10:
+    #         self.stock_flag = True
+    #         self.target_button_ready(locate).click()
+    #
+    # def buy_load_stocks(self, locate=None, data_frame=None):
+    #     """重消股初步交易操作"""
+    #     elements = self.driver.find_element_by_xpath(self.r_stock_value_locate)
+    #     # 重消股数量
+    #     stock_values = elements.get_attribute('value')
+    #     # 判断是否为数值
+    #     try:
+    #         self.stock_value = "%.2f" % float(stock_values)
+    #     except:
+    #         self.stock_value = 0
+    #     finally:
+    #         data_frame.stock_R_pin = self.stock_value  # 将股票数记录为数据对象的股票数属性
+    #
+    #     self.stock_judge(locate=locate)
 
-    def stock_judge(self, locate=None):
-        """判断数值是否达标"""
-        self.stock_flag = False
-        if float(self.stock_value) > 10:
-            self.stock_flag = True
-            self.target_button_ready(locate).click()
+    def chongxiao_value_judge(self, value_input):
+        value_1 = float(value_input.replace(",", ""))
+        if value_1 > 10:
+            return True
+        else:
+            return False
 
-    def buy_load_stocks(self, locate=None, data_frame=None):
-        """重消股初步交易操作"""
-        elements = self.driver.find_element_by_xpath(self.r_stock_value_locate)
-        # 重消股数量
-        stock_values = elements.get_attribute('value')
-        # 判断是否为数值
-        try:
-            self.stock_value = "%.2f" % float(stock_values)
-        except:
-            self.stock_value = 0
-        finally:
-            data_frame.stock_R_pin = self.stock_value  # 将股票数记录为数据对象的股票数属性
-
-        self.stock_judge(locate=locate)
+    def buy_load_stocks_mode(self, data_frame=None):
+        self.button_ready_and_click(locate=self.trading_button_locate)
+        self.button_ready_and_click(locate=self.buy_chongxiao_button_locate)
+        chongxiao_value_elements = self.driver.find_element_by_xpath(self.chongxiao_target_value_locate)
+        chongxiao_value = chongxiao_value_elements.get_attribute('value')
+        print(chongxiao_value)
+        if self.chongxiao_value_judge(value_input=chongxiao_value):
+            self.button_ready_and_click(locate=self.chongxiao_next_step_button_locate)
+            self.button_ready_and_click(locate=self.chongxiao_complete_button_locate)
+        data_frame.save_chongxiao_stock(chongxiao_stock=chongxiao_value)
 
 
 class LogoutMixin(ButtonMixin):
@@ -456,6 +486,35 @@ class InformationRecord(ButtonMixin):
         data_frame.save_information_data(info_data=self.information_data)
 
 
+class SellStock(ButtonMixin):
+    """卖股或重消"""
+    def __init__(self):
+        super().__init__()
+        self.trade_button_locate = "/html/body/a[9]"
+        self.sell_stock_button_locate = "/html/body/div[1]/a[1]"
+        self.stock_elements_locate = "/html/body/div[1]/table[1]/tbody/tr[10]/td/input"
+        self.next_step_button_locate = "/html/body/div[1]/table[1]/tbody/tr[11]/td/input[2]"
+        self.complete_button_locate_1 = "//*[@id='Submit']/input[2]"
+
+    def total_stock_value_judge(self, s_value):
+        value_1 = float(s_value.replace(",", ""))
+        if value_1 > 0:
+            return True
+        else:
+            return False
+
+    def sell_stock(self, data_frame=None):
+        self.entry_first_page_from_home(locate=(By.XPATH, self.trade_button_locate))
+        self.entry_first_page_from_home(locate=(By.XPATH, self.sell_stock_button_locate))
+        stock_elements = self.driver.find_element_by_xpath(self.stock_elements_locate)
+        total_stock_values = stock_elements.get_attribute('value')
+        print(total_stock_values)
+        if self.total_stock_value_judge(total_stock_values):
+            self.entry_first_page_from_home(locate=(By.XPATH, self.next_step_button_locate))
+            self.entry_first_page_from_home(locate=(By.XPATH, self.complete_button_locate_1))
+        data_frame.save_sell_stock(stock_data=total_stock_values)
+
+
 class DemoOne(ButtonMixin):
     pass
 
@@ -467,7 +526,8 @@ class DemoTwo(LoginMixin,
               PhoneNumberSetting,
               ForcePhoneNumberSetting,
               WindrowCashToTaiZhi,
-              InformationRecord):
+              InformationRecord,
+              SellStock):
     pass
 
 

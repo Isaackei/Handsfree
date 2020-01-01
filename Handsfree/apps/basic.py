@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium import webdriver
 
+
 from settings.settings import DRIVER, URL, TOTAL_NUMBER_OF_REFRESH, WEB_WAIT_TIME, PHONE_NUMBER
 
 
@@ -64,6 +65,7 @@ class ButtonMixin(Basic):
     def __init__(self):
         super().__init__()
         self.trading_button_locate = "/html/body/a[9]"  # 交易按钮
+        self.error_info_check = "//div[@class='bodydoc']//font[@color='red']//b[contains(text(), '故障')]"
 
     def target_button_ready(self, locate=None):
         """
@@ -88,7 +90,7 @@ class ButtonMixin(Basic):
 
     def button_ready_and_click(self, locate=None):
         """按钮就绪并点击"""
-        self.target_button_ready(locate=(By.XPATH, locate))
+        self.target_button_ready(locate=(By.XPATH, locate)).click()
 
     def chinese_login_page_start(self):
         self.get_url()
@@ -96,6 +98,14 @@ class ButtonMixin(Basic):
         chinese_button = self.target_button_ready(locate=chinese_button_locate)
         chinese_button.click()
         self.common_refresh()
+
+    def error_or_wrong_info_check(self):
+        self.common_refresh()
+        try:
+            self.driver.find_element_by_xpath(self.error_info_check)
+        except:
+            return False
+        return True
 
 
 class LoginMixin(ButtonMixin):
@@ -199,7 +209,12 @@ class StockModeAMixin(ButtonMixin):
     #     self.stock_judge(locate=locate)
 
     def chongxiao_value_judge(self, value_input):
-        value_1 = float(value_input.replace(",", ""))
+        import time
+        try:
+            value_1 = float(value_input.replace(",", ""))
+        except:
+            return False
+        time.sleep(2)
         if value_1 > 10:
             return True
         else:
@@ -210,7 +225,6 @@ class StockModeAMixin(ButtonMixin):
         self.button_ready_and_click(locate=self.buy_chongxiao_button_locate)
         chongxiao_value_elements = self.driver.find_element_by_xpath(self.chongxiao_target_value_locate)
         chongxiao_value = chongxiao_value_elements.get_attribute('value')
-        print(chongxiao_value)
         if self.chongxiao_value_judge(value_input=chongxiao_value):
             self.button_ready_and_click(locate=self.chongxiao_next_step_button_locate)
             self.button_ready_and_click(locate=self.chongxiao_complete_button_locate)
@@ -286,52 +300,81 @@ class PhoneNumberSetting(ButtonMixin):
     def __init__(self):
         super().__init__()
         self.phone_number = PHONE_NUMBER
-        self.leve_one_button_locate = "/html/body/a[10]"
+        # self.leve_one_button_locate = "/html/body/a[10]"
+        self.setting_page_button_locate = "/html/body/a[4]"
+        self.my_account_button_locate = "/html/body/div[1]/ul/li[1]/a"
+        self.entry_my_account_password_input_locate = "/html/body/div[1]/div[2]/form/table/tbody/tr[2]/td/input[1]"
+        self.entry_my_account_next_step_button_locate = "/html/body/div[1]/div[2]/form/table/tbody/tr[2]/td/input[2]"
+        self.taizhi_pay_phone_number_locate = "/html/body/div[1]/table/tbody/tr[29]/td/input"
+        self.submit_button_locate = "/html/body/div[1]/table/tbody/tr[30]/td/input[2]"
 
-    def secondary_password_verification(self):
-        """判断二级密码是否正确"""
-        self.common_refresh()
-        error_locate = "//div[@class='bodydoc']//font[@color='red']//b[contains(text(), '故障')]"
-        try:
-            self.driver.find_element_by_xpath(error_locate)
-        except:
-            return True
-        # 出现故障
-        return False
-
-    def enter_setting(self, data_frame=None):
-        # ‘选项’路径
-        setting_btn_locate = (By.XPATH, self.leve_one_button_locate)
-        self.target_button_ready(locate=setting_btn_locate).click()
-        self.common_refresh()
-        # ‘账户设置路径’
-        account_setting_btn_locate = (By.XPATH, "/html/body/div[1]/ul/li[1]/a")
-        self.target_button_ready(locate=account_setting_btn_locate).click()
-        self.common_refresh()
-        # 二级密码定位
-        secondary_password_locate = ("/html/body/div[1]/div[2]/form/table/tbody/tr[2]/td/input[1]")
-        self.driver.find_element_by_xpath(secondary_password_locate).send_keys(data_frame.user_account[2])
-        # ‘下一步’按钮定位
-        next_btn_locate = (By.XPATH, "/html/body/div[1]/div[2]/form/table/tbody/tr[2]/td/input[2]")
-        self.target_button_ready(locate=next_btn_locate).click()
-        self.common_refresh()
-        check_point = self.secondary_password_verification()
-        return check_point
-
-    def get_phone_number(self, data_frame=None):
-        """查找太子支付手机号码"""
-        # 太子支付手机号码定位
-        phone_number_locate = "//td[@class='tdc']//input[@type='TEXT' and @name='TZN']"
-        phone_number_value = self.driver.find_element_by_xpath(phone_number_locate).get_attribute("value")
-        if phone_number_value == "":  # 没有设置支付号码
-            self.driver.find_element_by_xpath(phone_number_locate).send_keys(self.phone_number)
-            # 提交按钮
-            submit_btn_locate = (By.XPATH, "/html/body/div[1]/table/tbody/tr[30]/td/input[2]")
-            self.target_button_ready(locate=submit_btn_locate).click()
-            self.common_refresh()
+    def check_taizhipay_phone_number(self, data_frame=None):
+        """check if the phone number has been set or not"""
+        phone_number_check_point = self.driver.find_element_by_xpath(self.taizhi_pay_phone_number_locate).get_attribute("value")
+        print(phone_number_check_point, data_frame.user_account[0])
+        if phone_number_check_point == "":
+            self.driver.find_element_by_xpath(self.taizhi_pay_phone_number_locate).send_keys(self.phone_number)
+            self.button_ready_and_click(locate=self.submit_button_locate)
             data_frame.save_phone_number(phone_num=self.phone_number)
-        else:  # 已设置了支付号码，执行记录
-            data_frame.save_phone_number(phone_num=phone_number_value)
+        else:
+            data_frame.save_phone_number(phone_num=phone_number_check_point)
+
+    def set_taizhipay_phone_number(self, data_frame=None):
+        """setting phone number for taizhi pay"""
+        self.button_ready_and_click(locate=self.setting_page_button_locate)
+        self.button_ready_and_click(locate=self.my_account_button_locate)
+        self.driver.find_element_by_xpath(self.entry_my_account_password_input_locate).send_keys(data_frame.user_account[2])
+        self.button_ready_and_click(locate=self.entry_my_account_next_step_button_locate)
+        check_point_for_password = self.error_or_wrong_info_check()
+        if check_point_for_password:
+            data_frame.save_secondary_password_error()
+            return None
+        self.check_taizhipay_phone_number(data_frame=data_frame)
+
+    # def secondary_password_verification(self):
+    #     """判断二级密码是否正确"""
+    #     self.common_refresh()
+    #     error_locate = "//div[@class='bodydoc']//font[@color='red']//b[contains(text(), '故障')]"
+    #     try:
+    #         self.driver.find_element_by_xpath(error_locate)
+    #     except:
+    #         return True
+    #     # 出现故障
+    #     return False
+    #
+    # def enter_setting(self, data_frame=None):
+    #     # ‘选项’路径
+    #     setting_btn_locate = (By.XPATH, self.leve_one_button_locate)
+    #     self.target_button_ready(locate=setting_btn_locate).click()
+    #     self.common_refresh()
+    #     # ‘账户设置路径’
+    #     account_setting_btn_locate = (By.XPATH, "/html/body/div[1]/ul/li[1]/a")
+    #     self.target_button_ready(locate=account_setting_btn_locate).click()
+    #     self.common_refresh()
+    #     # 二级密码定位
+    #     secondary_password_locate = ("/html/body/div[1]/div[2]/form/table/tbody/tr[2]/td/input[1]")
+    #     self.driver.find_element_by_xpath(secondary_password_locate).send_keys(data_frame.user_account[2])
+    #     # ‘下一步’按钮定位
+    #     next_btn_locate = (By.XPATH, "/html/body/div[1]/div[2]/form/table/tbody/tr[2]/td/input[2]")
+    #     self.target_button_ready(locate=next_btn_locate).click()
+    #     self.common_refresh()
+    #     check_point = self.secondary_password_verification()
+    #     return check_point
+    #
+    # def get_phone_number(self, data_frame=None):
+    #     """查找太子支付手机号码"""
+    #     # 太子支付手机号码定位
+    #     phone_number_locate = "//td[@class='tdc']//input[@type='TEXT' and @name='TZN']"
+    #     phone_number_value = self.driver.find_element_by_xpath(phone_number_locate).get_attribute("value")
+    #     if phone_number_value == "":  # 没有设置支付号码
+    #         self.driver.find_element_by_xpath(phone_number_locate).send_keys(self.phone_number)
+    #         # 提交按钮
+    #         submit_btn_locate = (By.XPATH, "/html/body/div[1]/table/tbody/tr[30]/td/input[2]")
+    #         self.target_button_ready(locate=submit_btn_locate).click()
+    #         self.common_refresh()
+    #         data_frame.save_phone_number(phone_num=self.phone_number)
+    #     else:  # 已设置了支付号码，执行记录
+    #         data_frame.save_phone_number(phone_num=phone_number_value)
 
 
 class ForcePhoneNumberSetting(ButtonMixin):
@@ -392,7 +435,7 @@ class WindrowCashToTaiZhi(ButtonMixin):
     """奖金分转太子提现"""
     def __init__(self):
         super().__init__()
-        self.level_one_page_button_locate = "/html/body/a[10]"
+        self.level_one_page_button_locate_qianbao = "/html/body/a[11]"
         self.cash_point = None
         self.cash_point_trade = None
         self.cash_point_value_locate = "/html/body/div[1]/table/tbody/tr[2]/td[3]"
@@ -425,7 +468,7 @@ class WindrowCashToTaiZhi(ButtonMixin):
         self.cash_point = float(num.replace(",", ""))
 
     def cash_point_to_taizhi(self, data_frame=None):
-        self.entry_first_page_from_home(locate=(By.XPATH, self.level_one_page_button_locate))
+        self.entry_first_page_from_home(locate=(By.XPATH, self.level_one_page_button_locate_qianbao))
         try:
             temp_num = self.driver.find_element_by_xpath(self.cash_point_value_locate).text
             print(temp_num, data_frame.user_account[0])
@@ -515,6 +558,71 @@ class SellStock(ButtonMixin):
         data_frame.save_sell_stock(stock_data=total_stock_values)
 
 
+class BTCToCash(ButtonMixin):
+    """BTC to taizhiPay"""
+    def __init__(self):
+        super().__init__()
+        self.BTC36Club_button_locate = "/html/body/a[3]"
+        self.BTCwallets_button_locate = "/html/body/a[9]"
+        self.BTC_value_locate = "/html/body/div[1]/table/tbody/tr[2]/td[3]"
+        self.BTC_value_trade_button_locate = "/html/body/div[1]/table/tbody/tr[2]/td[2]/a"
+        self.BTC_transfer_taizhi_button_locate = "/html/body/div[1]/ul/li[2]/a"
+        self.BTC_value_input_locate = "/html/body/div[1]/table/tbody/tr[7]/td/input"
+        self.BTC_second_password_locate = "/html/body/div[1]/table/tbody/tr[8]/td/input"
+        self.BTC_next_step_button_locate = "/html/body/div[1]/table/tbody/tr[9]/td/input[2]"
+        self.BTC_complete_button_locate = '//*[@id="Submit"]/input[2]'
+        self.BTC_value = None
+        self.BTC_real_trade_value = None
+        self.BTC_error_trade_value = "//div[@class='bodydoc']//font[@color='red']//b[contains(text(), '故障')]"
+
+    def btc_value_string_transfer(self, num=None):
+        if num == "-":
+            self.BTC_value = 0
+        self.BTC_value = float(num.replace(",", ""))
+
+    def btc_first_error_judge(self):
+        self.common_refresh()
+        try:
+            self.driver.find_element_by_xpath(self.BTC_error_trade_value)
+        except:
+            return False
+        return True
+
+    def btc_value_input(self, data_frame=None):
+        self.BTC_real_trade_value = str(int((self.BTC_value - 10) / 1.05))
+        self.driver.find_element_by_xpath(self.BTC_value_input_locate).send_keys(self.BTC_real_trade_value)
+        self.driver.find_element_by_xpath(self.BTC_second_password_locate).send_keys(data_frame.user_account[2])
+
+    def btc_to_taizhi_pay(self, data_frame=None):
+        """main process"""
+        self.button_ready_and_click(locate=self.BTC36Club_button_locate)
+        self.button_ready_and_click(locate=self.BTCwallets_button_locate)
+        try:
+            btc_values = self.driver.find_element_by_xpath(self.BTC_value_locate).text
+            print(btc_values, data_frame.user_account[0])
+            self.btc_value_string_transfer(num=btc_values)
+        except:
+            self.BTC_value = 0
+        finally:
+            if self.BTC_value > 115:
+                self.button_ready_and_click(locate=self.BTC_value_trade_button_locate)
+                self.button_ready_and_click(locate=self.BTC_transfer_taizhi_button_locate)
+                self.btc_value_input(data_frame=data_frame)
+                self.button_ready_and_click(locate=self.BTC_next_step_button_locate)
+                check_point_for_trade = self.btc_first_error_judge()
+                if check_point_for_trade:
+                    data_frame.save_btc_to_taizhi(btc_data="F")
+                    return None
+                self.button_ready_and_click(locate=self.BTC_complete_button_locate)
+                data_frame.save_btc_to_taizhi(btc_data=self.BTC_real_trade_value)
+                return None
+            else:
+                data_frame.save_btc_to_taizhi(btc_data=str(self.BTC_value) + "F")
+                return None
+
+
+
+
 class DemoOne(ButtonMixin):
     pass
 
@@ -527,7 +635,8 @@ class DemoTwo(LoginMixin,
               ForcePhoneNumberSetting,
               WindrowCashToTaiZhi,
               InformationRecord,
-              SellStock):
+              SellStock,
+              BTCToCash):
     pass
 
 

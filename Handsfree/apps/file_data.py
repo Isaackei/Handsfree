@@ -54,6 +54,7 @@ class FilesData(object):
             df_prepare['TaiZhi-phone'] = ""
             df_prepare['UserInfo'] = ""
             df_prepare['Sale-stock'] = ""
+            df_prepare['BTC'] = ""
 
             df_prepare.to_excel(self.file_name, index=True)
             # 重新打开文件
@@ -93,6 +94,7 @@ class FilesData(object):
                 "TaiZhi-phone": "",
                 "UserInfo": "",
                 "Sale-stock": "",
+                "BTC": "",
             }
             self.df.loc["config"] = config
             self.df.to_excel(self.file_name)
@@ -191,5 +193,11 @@ class SaveData(FilesData):
     def save_chongxiao_stock(self, chongxiao_stock=None):
         """买重消股"""
         self.df.loc[self.data_index, 'R-stocks'] = chongxiao_stock
+        self.df.loc["config", 'Password'] = self.data_index
+        self.df.to_excel(self.file_name)
+
+    def save_btc_to_taizhi(self, btc_data=None):
+        """BTC to taizhiPay"""
+        self.df.loc[self.data_index, 'BTC'] = btc_data
         self.df.loc["config", 'Password'] = self.data_index
         self.df.to_excel(self.file_name)

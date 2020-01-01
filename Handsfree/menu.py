@@ -13,6 +13,7 @@ def method_for_dispatch():
     get_var_5 = var_5.get()
     get_var_6 = var_6.get()
     get_var_7 = var_7.get()
+    get_var_8 = var_8.get()
     get_var_number = phone_text.get()
     from middle_transfer import first_start_up
     first_start_up(get_var_1,
@@ -22,6 +23,7 @@ def method_for_dispatch():
                    get_var_5,
                    get_var_6,
                    get_var_7,
+                   get_var_8,
                    phone_number=get_var_number)
 
 
@@ -150,7 +152,7 @@ mode_4_cb = Checkbutton(canvas, text="强制修改",
 mode_4_cb.place(x=150, y=200)
 
 var_5 = IntVar()
-mode_5_cb = Checkbutton(canvas, text="现金分提现",
+mode_5_cb = Checkbutton(canvas, text="奖金分提现",
                         background="#D2B48C",
                         font=("Calibri", 10),
                         variable=var_5)
@@ -169,6 +171,14 @@ mode_7_cb = Checkbutton(canvas, text="卖重消/股",
                         font=("Calibri", 10),
                         variable=var_7)
 mode_7_cb.place(x=150, y=140)
+
+# BTC
+var_8 = IntVar()
+mode_8_cb = Checkbutton(canvas, text="BTC提现",
+                        background="#D2B48C",
+                        font=("Calibri", 10),
+                        variable=var_8)
+mode_8_cb.place(x=150, y=110)
 
 # 文件路径显示
 text_show2 = Text(canvas, background="#8B4513", height=1, width=27, fg="white",

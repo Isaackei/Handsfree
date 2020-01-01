@@ -1,6 +1,6 @@
-import datetime
-import time
-# from datetime import datetime
-time_1 = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-start = datetime.datetime.strftime(time_1, '%Y_%m_%d_%H_%M_%S')
-print(time_1)
+def testing(nums):
+    value_1 = float(nums.replace(",", ""))
+    print(value_1)
+
+
+testing("12")

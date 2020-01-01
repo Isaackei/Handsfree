@@ -101,11 +101,7 @@ def logout_process(carrier=None, data_obj=None):
 
 def method_taizi_account_set(carrier=None, data_frame=None):
     """太子手机账号绑定"""
-    check_point_1 = carrier.enter_setting(data_frame=data_frame)
-    if check_point_1 is False:
-        data_frame.save_secondary_password_error()
-        return
-    carrier.get_phone_number(data_frame=data_frame)
+    carrier.set_taizhipay_phone_number(data_frame=data_frame)
 
 
 def method_force_taizi_account_set(carrier=None, data_frame=None):
@@ -130,3 +126,8 @@ def method_information_record(carrier=None, data_frame=None):
 def method_sell_stock(carrier=None, data_frame=None):
     """卖股流程"""
     carrier.sell_stock(data_frame=data_frame)
+
+
+def method_btc_to_taizhi(carrier=None, data_frame=None):
+    """BTC"""
+    carrier.btc_to_taizhi_pay(data_frame=data_frame)

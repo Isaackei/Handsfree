@@ -1,5 +1,6 @@
 from apps.main_process import login_process, method_cash_point, method_r_pin_stock, method_taizi_account_set, \
-    method_force_taizi_account_set, method_cash_point_transfer_taizhi, method_information_record, method_sell_stock, method_btc_to_taizhi
+    method_force_taizi_account_set, method_cash_point_transfer_taizhi, method_information_record, method_sell_stock, \
+    method_btc_to_taizhi, method_special_task
 
 
 class Dispatch(object):
@@ -95,7 +96,11 @@ def method_4(obj, carrier, data_obj):
 
 
 def method_5(obj, carrier, data_obj):
-    method_information_record(carrier=carrier, data_frame=data_obj)
+#    method_information_record(carrier=carrier, data_frame=data_obj)
+#    obj.method_mark_str = "000000" + obj.method_mark_str[6:]
+#    data_obj.method_mark = obj.method_mark_str
+#    data_obj.progress_point_save()
+    method_special_task(carrier=carrier, data_frame=data_obj)
     obj.method_mark_str = "000000" + obj.method_mark_str[6:]
     data_obj.method_mark = obj.method_mark_str
     data_obj.progress_point_save()

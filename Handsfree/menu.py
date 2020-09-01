@@ -145,7 +145,7 @@ phone_input.place(x=80, y=230)
 
 #check box 4
 var_4 = IntVar()
-mode_4_cb = Checkbutton(canvas, text="强制修改",
+mode_4_cb = Checkbutton(canvas, text="指定归拢",
                         background="#D2B48C",
                         font=("Calibri", 10),
                         variable=var_4)
@@ -159,7 +159,7 @@ mode_5_cb = Checkbutton(canvas, text="奖金分提现",
 mode_5_cb.place(x=15, y=260)
 
 var_6 = IntVar()
-mode_6_cb = Checkbutton(canvas, text="信息记录",
+mode_6_cb = Checkbutton(canvas, text="特别任务",
                         background="#D2B48C",
                         font=("Calibri", 10),
                         variable=var_6)

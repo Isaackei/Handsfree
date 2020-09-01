@@ -3,6 +3,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium import webdriver
+import time
 
 
 from settings.settings import DRIVER, URL, TOTAL_NUMBER_OF_REFRESH, WEB_WAIT_TIME, PHONE_NUMBER
@@ -64,6 +65,8 @@ class ButtonMixin(Basic):
 
     def __init__(self):
         super().__init__()
+        self.url_now = None
+        self.url_after = None
         self.trading_button_locate = "/html/body/a[9]"  # 交易按钮
         self.error_info_check = "//div[@class='bodydoc']//font[@color='red']//b[contains(text(), '故障')]"
 
@@ -90,7 +93,17 @@ class ButtonMixin(Basic):
 
     def button_ready_and_click(self, locate=None):
         """按钮就绪并点击"""
-        self.target_button_ready(locate=(By.XPATH, locate)).click()
+        self.url_now = self.driver.current_url
+        for i in range(10):
+            self.target_button_ready(locate=(By.XPATH, locate)).click()
+            self.url_after = self.driver.current_url
+            if self.url_after == self.url_now:
+                print("same")
+                pass
+            else:
+                print("pass")
+                break
+
 
     def chinese_login_page_start(self):
         self.get_url()
@@ -117,7 +130,7 @@ class LoginMixin(ButtonMixin):
         self.verify_code_locate = "//td[@class='tdc'][@valign='top']/span[%d]"
         self.verify_code_input_locate = "[name='SKey']"
         self.account_or_password_error = "//div[@class='bodydoc']/font[@color='red']/b[contains(text(),'故障')]"
-        self.login_page_button_locate = "/html/body/a[4]"
+        self.login_page_button_locate = "/html/body/a[3]"
 
     def verify_code_input(self):
         """验证码输入"""
@@ -239,11 +252,9 @@ class LogoutMixin(ButtonMixin):
 
     def logout_account(self, data_frame=None):
         data_frame.final_record_data()
-        self.target_button_ready(locate=(By.XPATH, self.logout_page_button_locate)).click()
-        self.common_refresh()
+        self.button_ready_and_click(locate=self.logout_page_button_locate)
         # 写死最后退出元素定位
-        btn_locate = (By.XPATH, self.logout_conform_button_locate)
-        self.target_button_ready(btn_locate).click()
+        self.button_ready_and_click(locate=self.logout_conform_button_locate)
 
 
 class CashPointMixin(ButtonMixin):
@@ -563,7 +574,7 @@ class BTCToCash(ButtonMixin):
     def __init__(self):
         super().__init__()
         self.BTC36Club_button_locate = "/html/body/a[3]"
-        self.BTCwallets_button_locate = "/html/body/a[9]"
+        self.BTCwallets_button_locate = "/html/body/a[10]"
         self.BTC_value_locate = "/html/body/div[1]/table/tbody/tr[2]/td[3]"
         self.BTC_value_trade_button_locate = "/html/body/div[1]/table/tbody/tr[2]/td[2]/a"
         self.BTC_transfer_taizhi_button_locate = "/html/body/div[1]/ul/li[2]/a"
@@ -607,6 +618,10 @@ class BTCToCash(ButtonMixin):
             if self.BTC_value > 115:
                 self.button_ready_and_click(locate=self.BTC_value_trade_button_locate)
                 self.button_ready_and_click(locate=self.BTC_transfer_taizhi_button_locate)
+                check_point_for_phone = self.btc_first_error_judge()
+                if check_point_for_phone:
+                    data_frame.save_btc_to_taizhi(btc_data="Phone")
+                    return None
                 self.btc_value_input(data_frame=data_frame)
                 self.button_ready_and_click(locate=self.BTC_next_step_button_locate)
                 check_point_for_trade = self.btc_first_error_judge()
@@ -621,6 +636,147 @@ class BTCToCash(ButtonMixin):
                 return None
 
 
+class TransferCashPointToMainAccount(ButtonMixin):
+    """Transfer Cash Point to target account"""
+    def __init__(self):
+        super().__init__()
+        self.BTC36Club_button_locate_1 = "/html/body/a[3]"
+        self.BTCwallets_button_locate_1 = "/html/body/a[10]"
+        self.BTC_value_locate_1 = "/html/body/div[1]/table/tbody/tr[2]/td[3]"
+        self.BTC_cash_point_button_locate_1 = "/html/body/div[1]/table/tbody/tr[2]/td[2]/a"
+        self.BTC_transfer_button_locate_1 = "/html/body/div[1]/ul/li[3]/a"
+        self.target_account_input_locate = "/html/body/div[1]/table/tbody/tr[5]/td/input"
+        #self.target_account_input_locate_2 = "/html/body/div[1]/table/tbody/tr[5]/td/input"
+        self.BTC_value_input_locate_1 = "/html/body/div[1]/table/tbody/tr[6]/td/input"
+        self.BTC_second_password_locate_1 = "/html/body/div[1]/table/tbody/tr[7]/td/input"
+        self.BTC_next_step_button_locate_1 = "/html/body/div[1]/table/tbody/tr[8]/td/input[2]"
+        self.BTC_complete_button_locate_1 = '//*[@id="Submit"]/input[2]'
+        self.target_value_1 = None
+        self.final_real_trade_value_1 = None
+        self.BTC_error_trade_value_1 = "//div[@class='bodydoc']//font[@color='red']//b[contains(text(), '故障')]"
+        self.ATF_button_locate = "/html/body/a[2]"
+        self.ATF_wallet_button_locate = "/html/body/a[11]"
+        self.ATF_value_locate = "/html/body/div[1]/table/tbody/tr[2]/td[3]"
+        self.ATF_cash_point_button_locate = "/html/body/div[1]/table/tbody/tr[2]/td[2]/a"
+        self.ATF_transfer_button_locate = "/html/body/div[1]/ul/li[6]/a"
+
+    def all_value_string_transfer_1(self, num=None):
+        if num == "-":
+            self.target_value_1 = 0
+        self.target_value_1 = float(num.replace(",", ""))
+
+    def btc_first_error_judge(self):
+        self.common_refresh()
+        try:
+            self.driver.find_element_by_xpath(self.BTC_error_trade_value_1)
+        except:
+            return False
+        return True
+
+    def transfer_detail_info_input(self, data_frame=None, tar_account="szlcl668", target_value=None):
+        self.final_real_trade_value_1 = str(int(target_value-10))
+        self.driver.find_element_by_xpath(self.target_account_input_locate).send_keys(tar_account)
+        self.driver.find_element_by_xpath(self.BTC_value_input_locate_1).send_keys(self.final_real_trade_value_1)
+        self.driver.find_element_by_xpath(self.BTC_second_password_locate_1).send_keys(data_frame.user_account[2])
+
+    def transfer_cash_point_to_main_account(self, data_frame=None):
+        """BTC归拢到指定账号"""
+        self.button_ready_and_click(locate=self.BTC36Club_button_locate_1)
+        self.button_ready_and_click(locate=self.BTCwallets_button_locate_1)
+        try:
+            btc_value = self.driver.find_element_by_xpath(self.BTC_value_locate_1).text
+            print(btc_value, data_frame.user_account[0])
+            self.all_value_string_transfer_1(num=btc_value)
+        except:
+            self.target_value_1 = 0
+        finally:
+            if self.target_value_1 > 20:
+                self.button_ready_and_click(locate=self.BTC_cash_point_button_locate_1)
+                self.button_ready_and_click(locate=self.BTC_transfer_button_locate_1)
+                self.transfer_detail_info_input(data_frame=data_frame, target_value=self.target_value_1)
+                self.button_ready_and_click(locate=self.BTC_next_step_button_locate_1)
+                check_point_flag_1 = self.btc_first_error_judge()
+                if check_point_flag_1:
+                    data_frame.save_btc_to_taizhi(btc_data="Error3")
+                    return None
+                self.button_ready_and_click(locate=self.BTC_complete_button_locate_1)
+                data_frame.save_btc_to_taizhi(btc_data=self.final_real_trade_value_1)
+                return None
+            else:
+                data_frame.save_btc_to_taizhi(btc_data=str(self.target_value_1) + "F")
+                return None
+
+    def transfer_cash_point_to_main_account_2(self, data_frame=None):
+        '''奖金分归拢到指定账号'''
+        self.button_ready_and_click(locate=self.ATF_button_locate)
+        self.button_ready_and_click(locate=self.ATF_wallet_button_locate)
+        try:
+            ATF_value = self.driver.find_element_by_xpath(self.ATF_value_locate).text
+            print(ATF_value, data_frame.user_account[0])
+            self.all_value_string_transfer_1(num=ATF_value)
+        except:
+            self.target_value_1 = 0
+        finally:
+            if self.target_value_1 > 20:
+                self.button_ready_and_click(locate=self.ATF_cash_point_button_locate)
+                self.button_ready_and_click(locate=self.ATF_transfer_button_locate)
+                self.transfer_detail_info_input(data_frame=data_frame, target_value=self.target_value_1)
+                self.button_ready_and_click(locate=self.BTC_next_step_button_locate_1)
+                check_point_flag_1 = self.btc_first_error_judge()
+                if check_point_flag_1:
+                    data_frame.save_btc_to_taizhi(btc_data="Error3")
+                    return None
+                self.button_ready_and_click(locate=self.BTC_complete_button_locate_1)
+                data_frame.save_btc_to_taizhi(btc_data=self.final_real_trade_value_1)
+                return None
+            else:
+                data_frame.save_btc_to_taizhi(btc_data=str(self.target_value_1) + "F")
+                return None
+
+    def target_account_transfer_process(self, data_frame=None):
+        self.transfer_cash_point_to_main_account(data_frame=data_frame)
+        self.transfer_cash_point_to_main_account_2(data_frame=data_frame)
+
+
+class SpecialTask(ButtonMixin):
+    """激活特别任务"""
+    def __init__(self):
+        super().__init__()
+        self.BTC36club_button_locate_3 = "/html/body/a[3]"
+        self.BTC36club_jet_net_button_locate_3 = "/html/body/a[9]"
+        self.BTC36club_activate_jet_net = "/html/body/div[1]/ul/li[1]/a"
+        self.BTC36club_target_number_locate = "/html/body/div[1]/table/tbody/tr[5]/td"
+        self.BTC36club_jet_net_next_button_locate = "/html/body/div[1]/table/tbody/tr[12]/td/input[2]"
+        self.BTC36club_jet_net_complete_button_locate = '//*[@id="Submit"]/input[2]'
+        self.target_num_A = None
+        self.target_num_B = None
+        self.flag_1 = 0
+
+    def find_target_number(self):
+        target_value_1 = self.driver.find_element_by_xpath(self.BTC36club_target_number_locate).text
+        target_value_2 = target_value_1[18:]
+        targetlist = target_value_2.split(" ", 2)
+        self.target_num_A = int(targetlist[0])
+        self.target_num_B = int(targetlist[2])
+        if self.target_num_A < self.target_num_B:
+            print("<")
+            return True
+        else:
+            print("=")
+            return False
+
+    def special_task_main_process(self, data_frame=None):
+        self.button_ready_and_click(locate=self.BTC36club_button_locate_3)
+        self.flag_1 = 0
+        while self.flag_1 == 0:
+            self.button_ready_and_click(locate=self.BTC36club_jet_net_button_locate_3)
+            self.button_ready_and_click(locate=self.BTC36club_activate_jet_net)
+            if self.find_target_number():
+                self.button_ready_and_click(locate=self.BTC36club_jet_net_next_button_locate)
+                self.button_ready_and_click(locate=self.BTC36club_jet_net_complete_button_locate)
+            else:
+                self.flag_1 = 1
+                break
 
 
 class DemoOne(ButtonMixin):
@@ -636,7 +792,9 @@ class DemoTwo(LoginMixin,
               WindrowCashToTaiZhi,
               InformationRecord,
               SellStock,
-              BTCToCash):
+              BTCToCash,
+              TransferCashPointToMainAccount,
+              SpecialTask):
     pass
 
 
